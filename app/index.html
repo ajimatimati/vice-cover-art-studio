@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VICE FRAME — Offline GTA-Style Multi-Panel Cover Art Studio</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="studio-shell">
+    <!-- Top Command Bar -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="2" width="24" height="24" rx="5" fill="#0d081a" stroke="url(#vfBrand)" stroke-width="2.4"/>
+            <path d="M2 14L13 12L11 26" stroke="#ff2e93" stroke-width="2.2"/>
+            <path d="M13 2L13 12L26 15" stroke="#3ef6ff" stroke-width="2.2"/>
+            <circle cx="19.5" cy="8.5" r="3.2" fill="#ffd166"/>
+            <defs>
+              <linearGradient id="vfBrand" x1="2" y1="2" x2="26" y2="26">
+                <stop stop-color="#ffd166"/>
+                <stop offset="0.5" stop-color="#ff2e93"/>
+                <stop offset="1" stop-color="#3ef6ff"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <div class="brand-copy">
+          <h1>VICE FRAME</h1>
+          <span class="brand-tag">100% OFFLINE COVER STUDIO</span>
+        </div>
+      </div>
+
+      <div class="size-selector" id="sizeSelector" role="group" aria-label="Export Post Size"></div>
+
+      <div class="topbar-actions">
+        <button type="button" class="btn-icon" id="undoBtn" title="Undo (Ctrl+Z)" disabled>↶</button>
+        <button type="button" class="btn-icon" id="redoBtn" title="Redo (Ctrl+Y)" disabled>↷</button>
+        <button type="button" class="btn-secondary" id="randomizeBtn" title="Shuffle layout and grade">✦ Shuffle</button>
+        <button type="button" class="btn-primary" id="exportPngBtn">⬇ Export PNG</button>
+      </div>
+    </header>
+
+    <!-- Main 2-Column Workspace -->
+    <main class="workspace">
+      <!-- Live Interactive Canvas Stage -->
+      <section class="stage-column" id="stageDropTarget">
+        <div class="stage-viewport">
+          <div class="stage-status-bar">
+            <span class="status-dot"></span>
+            <span id="stageStatusText">1920 × 1080 Ready • Click any panel to pan &amp; zoom • Drop local photos anywhere</span>
+          </div>
+          <div class="canvas-frame">
+            <canvas id="coverCanvas" width="1280" height="720"></canvas>
+            <div class="drop-overlay" id="dropOverlay">
+              <div class="drop-overlay-card">
+                <strong>Drop Your Photos Here</strong>
+                <span>Stays 100% on your machine — never uploaded</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Active Panel Crop & Position Dock -->
+        <div class="panel-dock">
+          <div class="panel-dock-left">
+            <span class="panel-badge" id="activePanelBadge">Panel 1 • Top-Left</span>
+            <label class="inline-slider">
+              <span>Zoom</span>
+              <input type="range" id="panelZoomSlider" min="1" max="2.8" step="0.02" value="1">
+              <strong id="panelZoomVal">1.00×</strong>
+            </label>
+          </div>
+          <div class="panel-dock-actions">
+            <button type="button" class="btn-chip" id="replacePanelPhotoBtn">Replace Photo</button>
+            <button type="button" class="btn-chip" id="flipPanelBtn">⇄ Flip</button>
+            <button type="button" class="btn-chip" id="resetPanelBtn">↺ Reset</button>
+            <button type="button" class="btn-chip" id="fillAllFromPanelBtn" title="Fill every panel with smart dynamic crops of this photo">Fill All Panels</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Studio Inspector -->
+      <aside class="inspector">
+        <!-- 1. Local Photos -->
+        <section class="card">
+          <div class="card-head">
+            <h2>Photos <span class="badge-local">Local Only</span></h2>
+            <div class="card-head-actions">
+              <button type="button" class="btn-mini" id="spreadPhotosBtn" title="Spread photos across all panels">Auto-Spread</button>
+              <button type="button" class="btn-mini btn-accent-mini" id="uploadPhotosBtn">+ Upload Photos</button>
+            </div>
+          </div>
+          <input type="file" id="multiPhotoInput" accept="image/*" multiple hidden>
+          <input type="file" id="singlePhotoInput" accept="image/*" hidden>
+
+          <div class="photo-tray" id="photoTray" aria-label="Loaded Photos"></div>
+        </section>
+
+        <!-- 2. Multi-Panel Layouts -->
+        <section class="card">
+          <div class="card-head">
+            <h2>Panel Layout</h2>
+            <span class="hint-text">Click panel on cover to crop</span>
+          </div>
+          <div class="layout-grid" id="layoutGrid"></div>
+        </section>
+
+        <!-- 3. Vice Color Grade & Poster Art Style -->
+        <section class="card">
+          <div class="card-head">
+            <h2>Sunset / Neon Grade</h2>
+            <span class="hint-text">Painterly cel-ink shader</span>
+          </div>
+          <div class="grade-grid" id="gradeGrid"></div>
+          <div class="sliders-row">
+            <label class="mini-slider">
+              <span>Posterize <b id="posterVal">62%</b></span>
+              <input type="range" id="posterSlider" min="0" max="1" step="0.02" value="0.62">
+            </label>
+            <label class="mini-slider">
+              <span>Comic Ink <b id="inkVal">68%</b></span>
+              <input type="range" id="inkSlider" min="0" max="1" step="0.02" value="0.68">
+            </label>
+            <label class="mini-slider">
+              <span>Print Grain <b id="grainVal">42%</b></span>
+              <input type="range" id="grainSlider" min="0" max="1" step="0.02" value="0.42">
+            </label>
+          </div>
+        </section>
+
+        <!-- 4. Bold Caption, Neon Script & Badge -->
+        <section class="card">
+          <div class="card-head">
+            <h2>Caption &amp; Emblem</h2>
+            <div class="toggle-inline">
+              <label class="check-pill">
+                <input type="checkbox" id="emblemToggle" checked>
+                <span>Sun &amp; Palms</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="caption-fields">
+            <label class="field">
+              <span>Main Title (use | for 2 lines)</span>
+              <input type="text" id="titleInput" maxlength="38" value="VICE | HORIZON" placeholder="VICE | HORIZON">
+            </label>
+            <div class="field-split">
+              <label class="field">
+                <span>Neon Script Tag</span>
+                <input type="text" id="subtitleInput" maxlength="30" value="Sunset Edition" placeholder="Midnight Coast">
+              </label>
+              <label class="field">
+                <span>Corner Stamp</span>
+                <input type="text" id="stampInput" maxlength="24" value="VICE COAST • 2026" placeholder="COASTAL EDITION">
+              </label>
+            </div>
+          </div>
+
+          <div class="title-meta-row">
+            <div class="pos-pills" id="titlePosPills" role="group" aria-label="Title Position">
+              <button type="button" data-pos="bottom-center" class="pos-pill active">Bottom</button>
+              <button type="button" data-pos="center" class="pos-pill">Center</button>
+              <button type="button" data-pos="bottom-left" class="pos-pill">Left</button>
+              <button type="button" data-pos="top-left" class="pos-pill">Top</button>
+            </div>
+
+            <div class="heat-stars-control" id="heatStarsControl" title="Heat Level Stars (0–5)">
+              <span class="stars-label">Heat</span>
+              <div class="stars-row" id="starsRow"></div>
+            </div>
+          </div>
+
+          <label class="mini-slider title-scale-row">
+            <span>Title Scale <b id="titleScaleVal">100%</b></span>
+            <input type="range" id="titleScaleSlider" min="0.72" max="1.24" step="0.02" value="1">
+          </label>
+        </section>
+      </aside>
+    </main>
+
+    <div class="toast" id="studioToast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
